@@ -72,9 +72,9 @@
                     <v-icon v-text="item.icon"></v-icon>
                   </v-list-item-icon>
                     <v-list-item-content>
-                      <v-list-item-title v-text="item.text"></v-list-item-title>
+                      <v-list-item-title v-text="item.title"></v-list-item-title>
                       <v-list-item-subtitle>
-                        {{ item.desc }}
+                        {{ item.description }}
                       </v-list-item-subtitle>
                     </v-list-item-content>
                     <v-btn text small color="primary">{{ item.qty }} kpl</v-btn>
@@ -136,6 +136,7 @@
 <script>
 import ItemDialog from './components/ItemDialog';
 import ListDialog from './components/ListDialog';
+import axios from 'axios'
 
 export default {
   name: 'Eventlist',
@@ -144,36 +145,7 @@ export default {
     ListDialog
   },
   data: () => ({
-    items: [
-       {
-         id: 1,
-         icon: 'mdi-star',
-         text: 'Maito',
-         desc: 'Kiehumaitoa pojille',
-         qty: 1
-       },
-       {
-         id: 2,
-         icon: 'mdi-star-outline',
-         text: 'Sipali',
-         desc: '',
-         qty: 1
-       },
-       {
-         id: 3,
-         icon: 'mdi-star-outline',
-         text: 'Hömpsyt',
-         desc: 'Pojat tykkäävät persikasta',
-         qty: 1
-       },
-       {
-         id: 4,
-         icon: 'mdi-star-outline',
-         text: 'Tiskikonetabletit',
-         desc: 'Fairy on paras se puhdistaa koneenkin',
-         qty: 1
-       },
-     ],
+    items: [],
      model: 1,
      listModalVisible: false,
      itemModalVisible: false,
@@ -181,19 +153,25 @@ export default {
   }),
   methods: {
     onSwipeLeft(e, item) {
-      /* eslint-disable no-console */
-      console.log(item);
-      /* eslint-enable no-console */
+      this.items.splice(this.items.indexOf(item), 1);
     },
     onTap(item) {
       this.currentItem = {
-        text: item.text,
-        desc: item.desc,
+        text: item.title,
+        desc: item.description,
         qty: item.qty
       };
       this.itemModalVisible = true;
     }
+  },
+  mounted() {
+    axios.get('http://localhost/listevents/item/1').then(response => {
+      this.items = response.data
+    }).catch(error => {
+      /* eslint-disable no-console */
+      console.log(error);
+      /* eslint-enable no-console */
+    });
   }
-
 };
 </script>
