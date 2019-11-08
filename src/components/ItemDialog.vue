@@ -6,7 +6,7 @@
           <v-btn icon dark @click="show = false">
             <v-icon>mdi-close</v-icon>
           </v-btn>
-          <v-toolbar-title>{{ title }}</v-toolbar-title>
+          <v-toolbar-title>{{title}}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
             <v-btn dark text @click="show = false">Tallenna</v-btn>
@@ -140,6 +140,9 @@ export default {
     },
     item: {
       type: Object
+    },
+    title: {
+      type: String
     }
   },
   data: () => ({
@@ -160,7 +163,6 @@ export default {
         color: 'red',
       },
     ],
-    title: "Lisää uusi artikkeli",
     currentItem: {},
     nonce: 1,
     menu: false,

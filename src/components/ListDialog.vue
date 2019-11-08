@@ -9,7 +9,7 @@
           <v-toolbar-title>Uusi Lista</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
-            <v-btn dark text @click="show = false">Tallenna</v-btn>
+            <v-btn dark text @click="saveList">Tallenna</v-btn>
           </v-toolbar-items>
         </v-toolbar>
         <v-card-text>
@@ -17,6 +17,7 @@
             <v-row>
               <v-col cols="12">
                 <v-text-field
+                  v-model="title"
                   label="Listan nimi*"
                   name="list-name"
                   required
@@ -25,6 +26,7 @@
               </v-col>
               <v-col cols="12">
                 <v-textarea
+                  v-modal="description"
                   name="list-info"
                   label="Lisätietoja"
                   hint="Tähän voit antaa lisätietoja luotavasta listasta"
@@ -40,6 +42,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   name: 'ListDialog',
   props: {
@@ -47,6 +50,10 @@ export default {
       type: Boolean,
     }
   },
+  data: () => ({
+    title: "",
+    description: ""
+  }),
   computed: {
     show: {
       get() {
@@ -57,6 +64,23 @@ export default {
           this.$emit('close')
         }
       }
+    }
+  },
+  methods: {
+    saveList() {
+      axios.post('http://localhost/listevents/', {
+        title: this.title,
+        description: this.description
+      }).then(response => {
+        if(response.data) {
+          this.show = false;
+          this.$emit('showSuccessMessage', 1);
+        }
+      }).catch(error => {
+        /* eslint-disable no-console */
+        console.log(error);
+        /* eslint-enable no-console */
+      });
     }
   }
 }
