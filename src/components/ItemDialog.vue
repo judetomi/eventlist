@@ -9,7 +9,7 @@
           <v-toolbar-title>{{title}}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
-            <v-btn dark text @click="show = false">Tallenna</v-btn>
+            <v-btn dark text @click="saveItem">Tallenna</v-btn>
           </v-toolbar-items>
         </v-toolbar>
         <v-card-text>
@@ -143,6 +143,9 @@ export default {
     },
     title: {
       type: String
+    },
+    currentList: {
+      type: Number
     }
   },
   data: () => ({
@@ -225,6 +228,15 @@ export default {
         .toLowerCase()
         .indexOf(query.toString().toLowerCase()) > -1
     },
+    saveItem() {
+      if(!this.item.id) {
+        this.show = false;
+        this.$emit('save', this.item);
+      } else {
+        this.show = false;
+        this.$emit('update', this.item);
+      }
+    }
   }
 }
 </script>

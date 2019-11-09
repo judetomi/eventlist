@@ -4,7 +4,10 @@
     <template>
       <div>
         <v-alert type="success" v-if="success==1">
-          I'm a success alert.
+          Toiminto suoritettu onnistuneesti!
+        </v-alert>
+        <v-alert type="error" v-if="error==1">
+          Ups! Tapahtui virhe!
         </v-alert>
         <v-app-bar
           color="blue accent-4"
@@ -140,19 +143,24 @@
     <ItemDialog
       :visible="itemModalVisible"
       :item="currentItem"
+      :currentList="currentList"
       :title="title"
       @close="itemModalVisible=false"
+      @save="addNewItem"
+      @update="updateItem"
     />
     <ListDialog
       :visible="listModalVisible"
       @close="listModalVisible=false"
     />
+    <confirm ref="confirm"></confirm>
   </v-app>
 </template>
 
 <script>
 import ItemDialog from './components/ItemDialog';
 import ListDialog from './components/ListDialog';
+import confirm from './components/Confirm';
 import axios from 'axios';
 import draggable from 'vuedraggable';
 
@@ -161,6 +169,7 @@ export default {
   components: {
     ItemDialog,
     ListDialog,
+    confirm,
     draggable
   },
   data: () => ({
@@ -174,11 +183,24 @@ export default {
     editable: true,
     title: "Lisää uusi",
     currentList: 1,
-    success: 0
+    success: 0,
+    error: 0
   }),
   methods: {
     onSwipeLeft(e, item) {
-      this.items.splice(this.items.indexOf(item), 1);
+      this.$refs.confirm.open('Poista', 'Oletko varma, että haluat poistaa artikkelin?', { color: 'red' }).then((confirm) => {
+        this.items.splice(this.items.indexOf(item), 1);
+        axios.delete('http://localhost/listevents/item/' + item.id).then(response => {
+          if(response.data) {
+            this.success = confirm;
+          }
+        }).catch(error => {
+          this.error = 1;
+          /* eslint-disable no-console */
+          console.log(error);
+          /* eslint-enable no-console */
+        })
+      });
     },
     onTap(item) {
       if(!this.isDragging) {
@@ -195,6 +217,7 @@ export default {
       axios.get('http://localhost/listevents/').then(response => {
         this.eventlists = response.data
       }).catch(error => {
+        this.error = 1;
         /* eslint-disable no-console */
         console.log(error);
         /* eslint-enable no-console */
@@ -204,6 +227,7 @@ export default {
       axios.get('http://localhost/listevents/item/' + this.currentList).then(response => {
         this.items = response.data
       }).catch(error => {
+        this.error = 1;
         /* eslint-disable no-console */
         console.log(error);
         /* eslint-enable no-console */
@@ -218,14 +242,45 @@ export default {
           this.success = true;
         }
       }).catch(error => {
+        this.error = 1;
         /* eslint-disable no-console */
         console.log(error);
         /* eslint-enable no-console */
       });
     },
-    showSuccessMessage(value) {
-      this.success = value;
-    }
+    addNewItem(item) {
+      axios.post('http://localhost/listevents/item/' + this.currentList, {
+        text: item.text,
+        description: item.desc,
+        qty: item.qty
+      }).then(response => {
+        if(response.data) {
+          this.success = 1;
+          this.items.push({title: item.text, description: item.desc, qty: item.qty});
+        }
+      }).catch(error => {
+        this.error = 1;
+        /* eslint-disable no-console */
+        console.log(error);
+        /* eslint-enable no-console */
+      });
+    },
+    updateItem(item) {
+      axios.put('http://localhost/listevents/item/' + item.id, {
+        text: item.text,
+        description: item.desc,
+        qty: item.qty
+      }).then(response => {
+        if(response.data) {
+          this.success = 1;
+        }
+      }).catch(error => {
+        this.error = 1;
+        /* eslint-disable no-console */
+        console.log(error);
+        /* eslint-enable no-console */
+      });
+    },
   },
   mounted() {
     this.loadLists();
