@@ -3,12 +3,13 @@
 
     <template>
       <div>
-        <v-alert type="success" v-if="success==1">
-          Toiminto suoritettu onnistuneesti!
-        </v-alert>
-        <v-alert type="error" v-if="error==1">
-          Ups! Tapahtui virhe!
-        </v-alert>
+        <v-snackbar
+          v-model="snackbar"
+          :top="y === 'top'"
+          :color="color"
+        >
+          {{ text }}
+        </v-snackbar>
         <v-app-bar
           color="blue accent-4"
           dense
@@ -124,11 +125,6 @@
         </v-btn>
 
         <v-btn>
-          <span>Järjestä</span>
-          <v-icon>mdi-border-color</v-icon>
-        </v-btn>
-
-        <v-btn>
           <span>Tuo lista</span>
           <v-icon>mdi-download</v-icon>
         </v-btn>
@@ -144,6 +140,7 @@
       :visible="itemModalVisible"
       :item="currentItem"
       :currentList="currentList"
+      :availableLists="eventlists"
       :title="title"
       @close="itemModalVisible=false"
       @save="addNewItem"
@@ -183,8 +180,10 @@ export default {
     editable: true,
     title: "Lisää uusi",
     currentList: 1,
-    success: 0,
-    error: 0
+    snackbar: false,
+    color: '',
+    text: '',
+    y: 'top'
   }),
   methods: {
     onSwipeLeft(e, item) {
@@ -192,10 +191,16 @@ export default {
         this.items.splice(this.items.indexOf(item), 1);
         axios.delete('http://localhost/listevents/item/' + item.id).then(response => {
           if(response.data) {
-            this.success = confirm;
+            if(confirm) {
+              this.text = "Artikkeli poistettu onnistuneesti";
+              this.colot = "success";
+              this.snackbar = true;
+            }
           }
         }).catch(error => {
-          this.error = 1;
+          this.text = "Ups! Artikkelia ei voitu poistaa!";
+          this.colot = "error";
+          this.snackbar = true;
           /* eslint-disable no-console */
           console.log(error);
           /* eslint-enable no-console */
@@ -217,7 +222,9 @@ export default {
       axios.get('http://localhost/listevents/').then(response => {
         this.eventlists = response.data
       }).catch(error => {
-        this.error = 1;
+        this.text = "Ups! Listoja ei voitu ladata!";
+        this.colot = "error";
+        this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
         /* eslint-enable no-console */
@@ -227,7 +234,9 @@ export default {
       axios.get('http://localhost/listevents/item/' + this.currentList).then(response => {
         this.items = response.data
       }).catch(error => {
-        this.error = 1;
+        this.text = "Ups! Artikkeleiden lataus epäonnistui!";
+        this.colot = "error";
+        this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
         /* eslint-enable no-console */
@@ -239,10 +248,14 @@ export default {
     removeList() {
       axios.delete('http://localhost/listevents/' + this.currentList).then(response => {
         if(response.data) {
-          this.success = true;
+          this.text = "Lista poistettu poistettu onnistuneesti!";
+          this.colot = "success";
+          this.snackbar = true;
         }
       }).catch(error => {
-        this.error = 1;
+        this.text = "Ups! Listan poistaminen ei onnistunut!";
+        this.colot = "error";
+        this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
         /* eslint-enable no-console */
@@ -252,14 +265,17 @@ export default {
       axios.post('http://localhost/listevents/item/' + this.currentList, {
         text: item.text,
         description: item.desc,
-        qty: item.qty
+        qty: item.qty,
+        favourite: item.favourite,
+        keywords: item.keywords
       }).then(response => {
         if(response.data) {
-          this.success = 1;
           this.items.push({title: item.text, description: item.desc, qty: item.qty});
         }
       }).catch(error => {
-        this.error = 1;
+        this.text = "Ups! Artikkelin lisäys ei onnistunut!";
+        this.colot = "error";
+        this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
         /* eslint-enable no-console */
@@ -272,10 +288,14 @@ export default {
         qty: item.qty
       }).then(response => {
         if(response.data) {
-          this.success = 1;
+          this.text = "Artikkelin muokkaus onnistui!";
+          this.colot = "success";
+          this.snackbar = true;
         }
       }).catch(error => {
-        this.error = 1;
+        this.text = "Ups! Artikkelin muokkaus epäonnistui!";
+        this.colot = "error";
+        this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
         /* eslint-enable no-console */

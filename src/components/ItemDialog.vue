@@ -42,8 +42,14 @@
                 </v-slider>
               </v-col>
               <v-col cols="12">
+                <v-checkbox
+                  v-model="item.favourite"
+                  label="Suosikki"
+                ></v-checkbox>
+              </v-col>
+              <v-col cols="12">
                 <v-combobox
-                  v-model="model"
+                  v-model="item.keywords"
                   :filter="filter"
                   :hide-no-data="!search"
                   :items="items"
@@ -118,7 +124,8 @@
               </v-col>
               <v-col cols="12">
                 <v-select
-                  :items="lists"
+                  v-model="item.list_id"
+                  :items="availableLists"
                   label="Siirrä listalle"
                   outlined
                 ></v-select>
@@ -146,13 +153,15 @@ export default {
     },
     currentList: {
       type: Number
+    },
+    availableLists: {
+      type: Array
     }
   },
   data: () => ({
     activator: null,
     attach: null,
     colors: ['green', 'purple', 'indigo', 'cyan', 'teal', 'orange'],
-    lists: [],
     editing: null,
     index: -1,
     items: [
@@ -166,7 +175,6 @@ export default {
         color: 'red',
       },
     ],
-    currentItem: {},
     nonce: 1,
     menu: false,
     model: [],
@@ -237,6 +245,9 @@ export default {
         this.$emit('update', this.item);
       }
     }
+  },
+  mounted() {
+    if(!this.item.qty) this.item.qty = 1;
   }
 }
 </script>
