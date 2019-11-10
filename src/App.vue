@@ -129,7 +129,10 @@
           <v-icon>mdi-download</v-icon>
         </v-btn>
 
-        <v-btn disabled>
+        <v-btn v-if="imported==0"
+          disabled
+          @click="saveImported"
+        >
           <span>Tallenna</span>
           <v-icon>mdi-content-save</v-icon>
         </v-btn>
@@ -150,6 +153,11 @@
       :visible="listModalVisible"
       @close="listModalVisible=false"
     />
+    <ImportItems
+      :visible="importModalVisible"
+      @save="addItem"
+      @close="importModalVisible=false"
+    />
     <confirm ref="confirm"></confirm>
   </v-app>
 </template>
@@ -158,6 +166,7 @@
 import ItemDialog from './components/ItemDialog';
 import ListDialog from './components/ListDialog';
 import confirm from './components/Confirm';
+import ImportItems from './components/ImportItems';
 import axios from 'axios';
 import draggable from 'vuedraggable';
 
@@ -166,6 +175,7 @@ export default {
   components: {
     ItemDialog,
     ListDialog,
+    ImportItems,
     confirm,
     draggable
   },
@@ -175,6 +185,7 @@ export default {
     model: 1,
     listModalVisible: false,
     itemModalVisible: false,
+    importModalVisible: false,
     currentItem: {},
     isDragging: false,
     editable: true,
@@ -183,7 +194,8 @@ export default {
     snackbar: false,
     color: '',
     text: '',
-    y: 'top'
+    y: 'top',
+    imported: 0
   }),
   methods: {
     onSwipeLeft(e, item) {
@@ -301,6 +313,12 @@ export default {
         /* eslint-enable no-console */
       });
     },
+    addItem(item) {
+      this.items.push({title: item.title, description: '', qty: item.qty});
+    },
+    saveImported() {
+
+    }
   },
   mounted() {
     this.loadLists();
