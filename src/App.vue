@@ -124,13 +124,13 @@
           <v-icon>mdi-delete</v-icon>
         </v-btn>
 
-        <v-btn>
+        <v-btn @click.stop="importModalVisible = true">
           <span>Tuo lista</span>
           <v-icon>mdi-download</v-icon>
         </v-btn>
 
-        <v-btn v-if="imported==0"
-          disabled
+        <v-btn
+          :disabled="imported===0"
           @click="saveImported"
         >
           <span>Tallenna</span>
@@ -201,17 +201,22 @@ export default {
     onSwipeLeft(e, item) {
       this.$refs.confirm.open('Poista', 'Oletko varma, että haluat poistaa artikkelin?', { color: 'red' }).then((confirm) => {
         this.items.splice(this.items.indexOf(item), 1);
-        axios.delete('http://localhost/listevents/item/' + item.id).then(response => {
+        axios.delete('http://localhost/listevents/item/' + item.id, {
+          auth: {
+            username: process.env.VUE_APP_USERNAME,
+            password: process.env.VUE_APP_PASSWORD
+          }
+        }).then(response => {
           if(response.data) {
             if(confirm) {
               this.text = "Artikkeli poistettu onnistuneesti";
-              this.colot = "success";
+              this.color = "success";
               this.snackbar = true;
             }
           }
         }).catch(error => {
           this.text = "Ups! Artikkelia ei voitu poistaa!";
-          this.colot = "error";
+          this.color = "error";
           this.snackbar = true;
           /* eslint-disable no-console */
           console.log(error);
@@ -231,11 +236,16 @@ export default {
       }
     },
     loadLists() {
-      axios.get('http://localhost/listevents/').then(response => {
+      axios.get('http://localhost/listevents/', {
+        auth: {
+          username: process.env.VUE_APP_USERNAME,
+          password: process.env.VUE_APP_PASSWORD
+        }
+      }).then(response => {
         this.eventlists = response.data
       }).catch(error => {
         this.text = "Ups! Listoja ei voitu ladata!";
-        this.colot = "error";
+        this.color = "error";
         this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
@@ -243,11 +253,16 @@ export default {
       });
     },
     reload() {
-      axios.get('http://localhost/listevents/item/' + this.currentList).then(response => {
+      axios.get('http://localhost/listevents/item/' + this.currentList, {
+        auth: {
+          username: process.env.VUE_APP_USERNAME,
+          password: process.env.VUE_APP_PASSWORD
+        }
+      }).then(response => {
         this.items = response.data
       }).catch(error => {
         this.text = "Ups! Artikkeleiden lataus epäonnistui!";
-        this.colot = "error";
+        this.color = "error";
         this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
@@ -258,15 +273,20 @@ export default {
       this.currentList = list.id;
     },
     removeList() {
-      axios.delete('http://localhost/listevents/' + this.currentList).then(response => {
+      axios.delete('http://localhost/listevents/' + this.currentList, {
+        auth: {
+          username: process.env.VUE_APP_USERNAME,
+          password: process.env.VUE_APP_PASSWORD
+        }
+      }).then(response => {
         if(response.data) {
           this.text = "Lista poistettu poistettu onnistuneesti!";
-          this.colot = "success";
+          this.color = "success";
           this.snackbar = true;
         }
       }).catch(error => {
         this.text = "Ups! Listan poistaminen ei onnistunut!";
-        this.colot = "error";
+        this.color = "error";
         this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
@@ -275,6 +295,10 @@ export default {
     },
     addNewItem(item) {
       axios.post('http://localhost/listevents/item/' + this.currentList, {
+        auth: {
+          username: process.env.VUE_APP_USERNAME,
+          password: process.env.VUE_APP_PASSWORD
+        },
         text: item.text,
         description: item.desc,
         qty: item.qty,
@@ -286,7 +310,7 @@ export default {
         }
       }).catch(error => {
         this.text = "Ups! Artikkelin lisäys ei onnistunut!";
-        this.colot = "error";
+        this.color = "error";
         this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
@@ -295,18 +319,22 @@ export default {
     },
     updateItem(item) {
       axios.put('http://localhost/listevents/item/' + item.id, {
+        auth: {
+          username: process.env.VUE_APP_USERNAME,
+          password: process.env.VUE_APP_PASSWORD
+        },
         text: item.text,
         description: item.desc,
         qty: item.qty
       }).then(response => {
         if(response.data) {
           this.text = "Artikkelin muokkaus onnistui!";
-          this.colot = "success";
+          this.color = "success";
           this.snackbar = true;
         }
       }).catch(error => {
         this.text = "Ups! Artikkelin muokkaus epäonnistui!";
-        this.colot = "error";
+        this.color = "error";
         this.snackbar = true;
         /* eslint-disable no-console */
         console.log(error);
@@ -315,6 +343,7 @@ export default {
     },
     addItem(item) {
       this.items.push({title: item.title, description: '', qty: item.qty});
+      this.imported = 1;
     },
     saveImported() {
 
