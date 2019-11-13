@@ -2,7 +2,7 @@
   <v-app id="eventlist">
 
     <template>
-      <div>
+      <div v-if="!$auth.loading">
         <v-snackbar
           v-model="snackbar"
           :top="y === 'top'"
@@ -14,8 +14,12 @@
           color="blue accent-4"
           dense
           dark
+          v-if="$auth.isAuthenticated"
         >
-          <v-btn icon>
+          <v-btn
+            icon
+            @click="logout"
+          >
             <v-icon>mdi-export-variant</v-icon>
           </v-btn>
 
@@ -53,11 +57,29 @@
             </v-list>
           </v-menu>
         </v-app-bar>
+        <v-app-bar
+          color="blue accent-4"
+          dense
+          dark
+          v-if="!$auth.isAuthenticated"
+        >
+          <v-toolbar-title>Login</v-toolbar-title>
+
+          <v-btn
+            icon
+            @click="login"
+          >
+            <v-icon>mdi-login-variant</v-icon>
+          </v-btn>
+        </v-app-bar>
       </div>
     </template>
 
     <v-content>
-      <v-container fluid>
+      <v-container
+        fluid
+        v-if="$auth.isAuthenticated"
+      >
         <template>
           <v-card
             class="mx-auto"
@@ -109,6 +131,7 @@
         dark
         fixed
         grow
+        v-if="$auth.isAuthenticated"
       >
         <v-btn>
           <span>Tyhjennä</span>
@@ -347,6 +370,14 @@ export default {
     },
     saveImported() {
 
+    },
+    login() {
+      this.$auth.loginWithRedirect();
+    },
+    logout() {
+      this.$auth.logout({
+        returnTo: window.location.origin
+      });
     }
   },
   mounted() {
