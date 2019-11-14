@@ -1,80 +1,18 @@
 <template>
   <v-app id="eventlist">
-
-    <template>
-      <div v-if="!$auth.loading">
-        <v-snackbar
-          v-model="snackbar"
-          :top="y === 'top'"
-          :color="color"
-        >
-          {{ text }}
-        </v-snackbar>
-        <v-app-bar
-          color="blue accent-4"
-          dense
-          dark
-          v-if="$auth.isAuthenticated"
-        >
-          <v-btn
-            icon
-            @click="logout"
-          >
-            <v-icon>mdi-export-variant</v-icon>
-          </v-btn>
-
-          <v-btn icon @click.stop="itemModalVisible = true">
-            <v-icon>mdi-plus-circle</v-icon>
-          </v-btn>
-
-          <v-btn icon @click="reload">
-            <v-icon>mdi-refresh</v-icon>
-          </v-btn>
-
-          <v-btn icon @click.stop="listModalVisible = true">
-            <v-icon>mdi-folder-plus-outline</v-icon>
-          </v-btn>
-
-          <v-spacer></v-spacer>
-
-          <v-menu
-            left
-            bottom
-            >
-            <template v-slot:activator="{ on }">
-              <v-btn icon v-on="on">
-                <v-icon>mdi-dots-vertical</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
-                v-for="(elist, i) in eventlists"
-                :key="`${i}`"
-                @click="changeList(elist)"
-                >
-                <v-list-item-title v-text="elist.title"></v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-app-bar>
-        <v-app-bar
-          color="blue accent-4"
-          dense
-          dark
-          v-if="!$auth.isAuthenticated"
-        >
-          <v-toolbar-title>Login</v-toolbar-title>
-
-          <v-btn
-            icon
-            @click="login"
-          >
-            <v-icon>mdi-login-variant</v-icon>
-          </v-btn>
-        </v-app-bar>
-      </div>
-    </template>
-
+    <NavBar
+      :eventlists="eventlists"
+      :y="y"
+      :color="color"
+      :text="text"
+      :snackbar="snackbar"
+      @login="login"
+      @logout="logout"
+      @reload="reload"
+      @showItemModal="itemModalVisible = true"
+      @showListModal="listModalVisible = true"
+      @changeList="changeList"
+    />
     <v-content>
       <v-container
         fluid
@@ -124,44 +62,14 @@
         </template>
       </v-container>
     </v-content>
-    <template>
-      <v-bottom-navigation
-        background-color="blue accent-4"
-        color="white"
-        dark
-        fixed
-        grow
-        v-if="$auth.isAuthenticated"
-      >
-        <v-btn>
-          <span>Tyhjennä</span>
-          <v-icon>mdi-autorenew</v-icon>
-        </v-btn>
-
-        <v-btn
-          v-if="currentList==1"
-          disabled
-          @click="removeList"
-        >
-          <span>Poista</span>
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-
-        <v-btn @click.stop="importModalVisible = true">
-          <span>Tuo lista</span>
-          <v-icon>mdi-download</v-icon>
-        </v-btn>
-
-        <v-btn
-          :disabled="imported===0"
-          @click="saveImported"
-        >
-          <span>Tallenna</span>
-          <v-icon>mdi-content-save</v-icon>
-        </v-btn>
-
-      </v-bottom-navigation>
-    </template>
+    <BottomNav
+      :currentList="currentList"
+      :imported="imported"
+      @truncateList="truncateList"
+      @removeList="removeList"
+      @saveImported="saveImported"
+      @showImportModal="importModalVisible = true"
+    />
     <ItemDialog
       :visible="itemModalVisible"
       :item="currentItem"
@@ -188,16 +96,21 @@
 <script>
 import ItemDialog from './components/ItemDialog';
 import ListDialog from './components/ListDialog';
+import NavBar from './components/NavBar';
+import BottomNav from './components/BottomNav';
 import confirm from './components/Confirm';
 import ImportItems from './components/ImportItems';
 import axios from 'axios';
 import draggable from 'vuedraggable';
+import { getInstance } from "./auth";
 
 export default {
   name: 'Eventlist',
   components: {
     ItemDialog,
     ListDialog,
+    NavBar,
+    BottomNav,
     ImportItems,
     confirm,
     draggable
@@ -224,7 +137,7 @@ export default {
     onSwipeLeft(e, item) {
       this.$refs.confirm.open('Poista', 'Oletko varma, että haluat poistaa artikkelin?', { color: 'red' }).then((confirm) => {
         this.items.splice(this.items.indexOf(item), 1);
-        axios.delete('http://localhost/listevents/item/' + item.id, {
+        axios.delete(process.env.VUE_APP_ITEM_ENTRYPOINT + item.id, {
           auth: {
             username: process.env.VUE_APP_USERNAME,
             password: process.env.VUE_APP_PASSWORD
@@ -259,13 +172,15 @@ export default {
       }
     },
     loadLists() {
-      axios.get('http://localhost/listevents/', {
+      axios.get(process.env.VUE_APP_LIST_ENTRYPOINT, {
         auth: {
           username: process.env.VUE_APP_USERNAME,
           password: process.env.VUE_APP_PASSWORD
         }
       }).then(response => {
-        this.eventlists = response.data
+        if(response.data) {
+          this.eventlists = response.data
+        }
       }).catch(error => {
         this.text = "Ups! Listoja ei voitu ladata!";
         this.color = "error";
@@ -276,13 +191,15 @@ export default {
       });
     },
     reload() {
-      axios.get('http://localhost/listevents/item/' + this.currentList, {
+      axios.get(process.env.VUE_APP_ITEM_ENTRYPOINT + this.currentList, {
         auth: {
           username: process.env.VUE_APP_USERNAME,
           password: process.env.VUE_APP_PASSWORD
         }
       }).then(response => {
-        this.items = response.data
+        if(response.data) {
+          this.items = response.data
+        }
       }).catch(error => {
         this.text = "Ups! Artikkeleiden lataus epäonnistui!";
         this.color = "error";
@@ -296,7 +213,7 @@ export default {
       this.currentList = list.id;
     },
     removeList() {
-      axios.delete('http://localhost/listevents/' + this.currentList, {
+      axios.delete(process.env.VUE_APP_LIST_ENTRYPOINT + this.currentList, {
         auth: {
           username: process.env.VUE_APP_USERNAME,
           password: process.env.VUE_APP_PASSWORD
@@ -317,7 +234,7 @@ export default {
       });
     },
     addNewItem(item) {
-      axios.post('http://localhost/listevents/item/' + this.currentList, {
+      axios.post(process.env.VUE_APP_ITEM_ENTRYPOINT + this.currentList, {
         auth: {
           username: process.env.VUE_APP_USERNAME,
           password: process.env.VUE_APP_PASSWORD
@@ -341,7 +258,7 @@ export default {
       });
     },
     updateItem(item) {
-      axios.put('http://localhost/listevents/item/' + item.id, {
+      axios.put(process.env.VUE_APP_ITEM_ENTRYPOINT + item.id, {
         auth: {
           username: process.env.VUE_APP_USERNAME,
           password: process.env.VUE_APP_PASSWORD
@@ -369,7 +286,48 @@ export default {
       this.imported = 1;
     },
     saveImported() {
-
+      axios.post(process.env.VUE_APP_ITEM_ENTRYPOINT + this.currentList, {
+        auth: {
+          username: process.env.VUE_APP_USERNAME,
+          password: process.env.VUE_APP_PASSWORD
+        },
+        items: this.items
+      }).then(response => {
+        if(response.data) {
+          this.text = "Lista tallennettu onnistuneesti";
+          this.color = "success";
+          this.snackbar = true;
+          this.imported = 0;
+        }
+      }).catch(error => {
+        this.text = "Ups! Listan tallennus ei onnistunut";
+        this.color = "error";
+        this.snackbar = true;
+        /* eslint-disable no-console */
+        console.log(error);
+        /* eslint-enable no-console */
+      });
+    },
+    truncateList() {
+      axios.delete(process.env.VUE_APP_LIST_ENTRYPOINT + '/items/' + this.currentList, {
+        auth: {
+          username: process.env.VUE_APP_USERNAME,
+          password: process.env.VUE_APP_PASSWORD
+        }
+      }).then(response => {
+        if(response.data) {
+          this.text = "Lista tyhjennetty onnistuneesti!";
+          this.color = "success";
+          this.snackbar = true;
+        }
+      }).catch(error => {
+        this.text = "Ups! Listan tyhjentäminen ei onnistunut!";
+        this.color = "error";
+        this.snackbar = true;
+        /* eslint-disable no-console */
+        console.log(error);
+        /* eslint-enable no-console */
+      });
     },
     login() {
       this.$auth.loginWithRedirect();
@@ -381,8 +339,13 @@ export default {
     }
   },
   mounted() {
-    this.loadLists();
-    this.reload();
+    const instance = getInstance();
+    instance.$watch("loading", async loading => {
+      if (!loading && instance.isAuthenticated) {
+        this.loadLists();
+        this.reload();
+      }
+    });
   },
   computed: {
     dragOptions() {

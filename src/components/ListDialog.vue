@@ -26,7 +26,7 @@
               </v-col>
               <v-col cols="12">
                 <v-textarea
-                  v-modal="description"
+                  v-model="description"
                   name="list-info"
                   label="Lisätietoja"
                   hint="Tähän voit antaa lisätietoja luotavasta listasta"
@@ -68,7 +68,7 @@ export default {
   },
   methods: {
     saveList() {
-      axios.post('http://localhost/listevents/', {
+      axios.post(process.env.VUE_APP_LIST_ENTRYPOINT, {
         title: this.title,
         description: this.description
       }).then(response => {

@@ -23,6 +23,7 @@ Vue.use(Auth0Plugin, {
   }
 });
 
+// Hammer time
 Vue.use(VueHammer)
 
 Vue.config.productionTip = false;
