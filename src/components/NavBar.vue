@@ -1,12 +1,5 @@
 <template>
   <div v-if="!$auth.loading">
-    <v-snackbar
-      v-model="snackbar"
-      :top="y === 'top'"
-      :color="color"
-    >
-      {{ text }}
-    </v-snackbar>
     <v-app-bar
       color="blue accent-4"
       dense
@@ -87,9 +80,6 @@ export default {
     },
     text: {
       type: String,
-    },
-    snackbar: {
-      type: Boolean,
     }
   },
   methods: {

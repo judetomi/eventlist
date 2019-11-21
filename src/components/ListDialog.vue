@@ -42,7 +42,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 export default {
   name: 'ListDialog',
   props: {
@@ -68,19 +67,8 @@ export default {
   },
   methods: {
     saveList() {
-      axios.post(process.env.VUE_APP_LIST_ENTRYPOINT, {
-        title: this.title,
-        description: this.description
-      }).then(response => {
-        if(response.data) {
-          this.show = false;
-          this.$emit('showSuccessMessage', 1);
-        }
-      }).catch(error => {
-        /* eslint-disable no-console */
-        console.log(error);
-        /* eslint-enable no-console */
-      });
+      this.show = false;
+      this.$emit('save', this.title, this.description);
     }
   }
 }

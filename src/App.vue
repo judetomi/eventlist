@@ -1,11 +1,17 @@
 <template>
   <v-app id="eventlist">
+    <v-snackbar
+      v-model="snackbar"
+      :top="y === 'top'"
+      :color="color"
+    >
+      {{ text }}
+    </v-snackbar>
     <NavBar
       :eventlists="eventlists"
       :y="y"
       :color="color"
       :text="text"
-      :snackbar="snackbar"
       @login="login"
       @logout="logout"
       @reload="reload"
@@ -83,6 +89,7 @@
     <ListDialog
       :visible="listModalVisible"
       @close="listModalVisible=false"
+      @save="addNewList"
     />
     <ImportItems
       :visible="importModalVisible"
@@ -163,9 +170,12 @@ export default {
     onTap(item) {
       if(!this.isDragging) {
         this.currentItem = {
+          id: item.id,
           text: item.title,
           desc: item.description,
-          qty: item.qty
+          qty: item.qty,
+          favourite: (item.favourite == 1) ? true : false,
+          keywords: JSON.parse(item.keywords)
         };
         this.title = "Muokkaa";
         this.itemModalVisible = true;
@@ -233,17 +243,54 @@ export default {
         /* eslint-enable no-console */
       });
     },
-    addNewItem(item) {
-      axios.post(process.env.VUE_APP_ITEM_ENTRYPOINT + this.currentList, {
+    addNewList(title, description) {
+      axios({
+        headers: {
+          'Content-type': 'application/json'
+        },
+        method: 'post',
+        url: process.env.VUE_APP_LIST_ENTRYPOINT,
         auth: {
           username: process.env.VUE_APP_USERNAME,
           password: process.env.VUE_APP_PASSWORD
         },
-        text: item.text,
-        description: item.desc,
-        qty: item.qty,
-        favourite: item.favourite,
-        keywords: item.keywords
+        data: {
+          title: title,
+          description: description
+        }
+      }).then(response => {
+        if(response.data) {
+          this.text = "Uusi Lista luotu onnistuneesti!";
+          this.color = "success";
+          this.snackbar = true;
+        }
+      }).catch(error => {
+        this.text = "Ups! Listan luominen ei onnistunut!";
+        this.color = "error";
+        this.snackbar = true;
+        /* eslint-disable no-console */
+        console.log(error);
+        /* eslint-enable no-console */
+      });
+    },
+    addNewItem(item) {
+      axios({
+        headers: {
+          'Content-type': 'application/json'
+        },
+        method: 'post',
+        url: process.env.VUE_APP_ITEM_ENTRYPOINT + this.currentList,
+        auth: {
+          username: process.env.VUE_APP_USERNAME,
+          password: process.env.VUE_APP_PASSWORD
+        },
+        data: {
+          text: item.text,
+          description: item.desc,
+          qty: item.qty,
+          favourite: item.favourite,
+          keywords: item.keywords
+        }
       }).then(response => {
         if(response.data) {
           this.items.push({title: item.text, description: item.desc, qty: item.qty});
@@ -258,19 +305,29 @@ export default {
       });
     },
     updateItem(item) {
-      axios.put(process.env.VUE_APP_ITEM_ENTRYPOINT + item.id, {
+      axios({
+        headers: {
+          'Content-type': 'application/json'
+        },
+        method: 'put',
+        url: process.env.VUE_APP_ITEM_ENTRYPOINT + 'update/' + item.id,
         auth: {
           username: process.env.VUE_APP_USERNAME,
           password: process.env.VUE_APP_PASSWORD
         },
-        text: item.text,
-        description: item.desc,
-        qty: item.qty
+        data: {
+          text: item.text,
+          description: item.desc,
+          qty: item.qty,
+          favourite: item.favourite,
+          keywords: item.keywords
+        }
       }).then(response => {
         if(response.data) {
           this.text = "Artikkelin muokkaus onnistui!";
           this.color = "success";
           this.snackbar = true;
+          this.reload();
         }
       }).catch(error => {
         this.text = "Ups! Artikkelin muokkaus epäonnistui!";
@@ -286,12 +343,19 @@ export default {
       this.imported = 1;
     },
     saveImported() {
-      axios.post(process.env.VUE_APP_ITEM_ENTRYPOINT + this.currentList, {
+      axios({
+        headers: {
+          'Content-type': 'application/json'
+        },
+        method: 'post',
+        url: process.env.VUE_APP_LIST_ENTRYPOINT + 'import/' + this.currentList,
         auth: {
           username: process.env.VUE_APP_USERNAME,
           password: process.env.VUE_APP_PASSWORD
         },
-        items: this.items
+        data: {
+          items: this.items
+        }
       }).then(response => {
         if(response.data) {
           this.text = "Lista tallennettu onnistuneesti";

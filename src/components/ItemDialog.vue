@@ -239,7 +239,7 @@ export default {
     saveItem() {
       if(!this.item.id) {
         this.show = false;
-        this.$emit('save', this.item);
+        this.$emit('save', this.currentList);
       } else {
         this.show = false;
         this.$emit('update', this.item);
