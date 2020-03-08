@@ -8,6 +8,7 @@
     v-if="$auth.isAuthenticated"
   >
     <v-btn
+      v-if="currentList !== 2"
       @click="truncateList"
     >
       <span>Tyhjennä</span>
@@ -15,20 +16,23 @@
     </v-btn>
 
     <v-btn
-      v-if="currentList==1"
-      disabled
+      v-if="currentList > 3"
       @click="removeList"
     >
       <span>Poista</span>
       <v-icon>mdi-delete</v-icon>
     </v-btn>
 
-    <v-btn @click.stop="importModalVisible = true">
+    <v-btn
+      v-if="currentList !== 2"
+      @click.stop="importModalVisible = true"
+    >
       <span>Tuo lista</span>
       <v-icon>mdi-download</v-icon>
     </v-btn>
 
     <v-btn
+      v-if="currentList !== 2"
       :disabled="imported===0"
       @click="saveImported"
     >

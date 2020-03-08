@@ -8,6 +8,7 @@
       {{ text }}
     </v-snackbar>
     <NavBar
+      :currentList="currentList"
       :eventlists="eventlists"
       :y="y"
       :color="color"
@@ -174,8 +175,7 @@ export default {
           text: item.title,
           desc: item.description,
           qty: item.qty,
-          favourite: (item.favourite == 1) ? true : false,
-          keywords: JSON.parse(item.keywords)
+          favourite: (item.favourite == 1) ? true : false
         };
         this.title = "Muokkaa";
         this.itemModalVisible = true;
@@ -220,27 +220,34 @@ export default {
       });
     },
     changeList(list) {
-      this.currentList = list.id;
+      this.currentList = parseInt(list.id);
+      this.reload();
     },
     removeList() {
-      axios.delete(process.env.VUE_APP_LIST_ENTRYPOINT + this.currentList, {
-        auth: {
-          username: process.env.VUE_APP_USERNAME,
-          password: process.env.VUE_APP_PASSWORD
+      this.$refs.confirm.open('Poista', 'Oletko varma, että haluat tämän listan ja kaikki sen artikkelit?', { color: 'red' }).then((confirm) => {
+        if(confirm) {
+          axios.delete(process.env.VUE_APP_LIST_ENTRYPOINT + this.currentList, {
+            auth: {
+              username: process.env.VUE_APP_USERNAME,
+              password: process.env.VUE_APP_PASSWORD
+            }
+          }).then(response => {
+            if(response.data) {
+              this.text = "Lista poistettu poistettu onnistuneesti!";
+              this.color = "success";
+              this.snackbar = true;
+              this.currentList = 1 // load initial list
+              this.reload();
+            }
+          }).catch(error => {
+            this.text = "Ups! Listan poistaminen ei onnistunut!";
+            this.color = "error";
+            this.snackbar = true;
+            /* eslint-disable no-console */
+            console.log(error);
+            /* eslint-enable no-console */
+          });
         }
-      }).then(response => {
-        if(response.data) {
-          this.text = "Lista poistettu poistettu onnistuneesti!";
-          this.color = "success";
-          this.snackbar = true;
-        }
-      }).catch(error => {
-        this.text = "Ups! Listan poistaminen ei onnistunut!";
-        this.color = "error";
-        this.snackbar = true;
-        /* eslint-disable no-console */
-        console.log(error);
-        /* eslint-enable no-console */
       });
     },
     addNewList(title, description) {
@@ -286,10 +293,10 @@ export default {
         },
         data: {
           text: item.text,
+          ftext: item.ftext,
           description: item.desc,
           qty: item.qty,
-          favourite: item.favourite,
-          keywords: item.keywords
+          favourite: item.favourite
         }
       }).then(response => {
         if(response.data) {
@@ -317,10 +324,10 @@ export default {
         },
         data: {
           text: item.text,
+          list_id: item.list_id,
           description: item.desc,
           qty: item.qty,
-          favourite: item.favourite,
-          keywords: item.keywords
+          favourite: item.favourite
         }
       }).then(response => {
         if(response.data) {
@@ -373,7 +380,7 @@ export default {
       });
     },
     truncateList() {
-      axios.delete(process.env.VUE_APP_LIST_ENTRYPOINT + '/items/' + this.currentList, {
+      axios.delete(process.env.VUE_APP_LIST_ENTRYPOINT + 'items/' + this.currentList, {
         auth: {
           username: process.env.VUE_APP_USERNAME,
           password: process.env.VUE_APP_PASSWORD
@@ -383,6 +390,7 @@ export default {
           this.text = "Lista tyhjennetty onnistuneesti!";
           this.color = "success";
           this.snackbar = true;
+          this.items = [];
         }
       }).catch(error => {
         this.text = "Ups! Listan tyhjentäminen ei onnistunut!";

@@ -13,7 +13,11 @@
         <v-icon>mdi-export-variant</v-icon>
       </v-btn>
 
-      <v-btn icon @click="itemModalVisible">
+      <v-btn
+        v-if="currentList !== 2"
+        icon
+        @click="itemModalVisible"
+      >
         <v-icon>mdi-plus-circle</v-icon>
       </v-btn>
 
@@ -69,6 +73,9 @@
 export default {
   name: 'NavBar',
   props: {
+    currentList: {
+      type: Number
+    },
     eventlists: {
       type: Array,
     },
@@ -98,8 +105,8 @@ export default {
     showListModal() {
       this.$emit('showListModal');
     },
-    changeList() {
-      this.$emit('changeList');
+    changeList(list) {
+      this.$emit('changeList', list);
     },
     itemModalVisible() {
       this.$emit('showItemModal');
