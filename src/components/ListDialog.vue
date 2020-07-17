@@ -1,6 +1,11 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="show" fullscreen hide-overlay transition="dialog-bottom-transition">
+    <v-dialog
+      v-model="show"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+    >
       <v-card>
         <v-toolbar dark color="primary">
           <v-btn icon dark @click="show = false">
@@ -43,10 +48,10 @@
 
 <script>
 export default {
-  name: 'ListDialog',
+  name: "ListDialog",
   props: {
     visible: {
-      type: Boolean,
+      type: Boolean
     }
   },
   data: () => ({
@@ -56,11 +61,11 @@ export default {
   computed: {
     show: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(value) {
         if (!value) {
-          this.$emit('close')
+          this.$emit("close");
         }
       }
     }
@@ -68,8 +73,8 @@ export default {
   methods: {
     saveList() {
       this.show = false;
-      this.$emit('save', this.title, this.description);
+      this.$emit("save", this.title, this.description);
     }
   }
-}
+};
 </script>

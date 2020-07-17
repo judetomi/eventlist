@@ -1,12 +1,17 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="show" fullscreen hide-overlay transition="dialog-bottom-transition">
+    <v-dialog
+      v-model="show"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+    >
       <v-card>
         <v-toolbar dark color="primary">
           <v-btn icon dark @click="show = false">
             <v-icon>mdi-close</v-icon>
           </v-btn>
-          <v-toolbar-title>{{title}}</v-toolbar-title>
+          <v-toolbar-title>{{ title }}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
             <v-btn dark text @click="saveItem">Tallenna</v-btn>
@@ -31,7 +36,7 @@
                   label="Valitse suosikeista"
                   :items="favourites"
                   :filter="customFilter"
-                  :clearable=true
+                  :clearable="true"
                   item-text="title"
                 ></v-autocomplete>
               </v-col>
@@ -63,10 +68,10 @@
               <v-col cols="12" v-if="currentList !== 2">
                 <v-select
                   v-if="item.id"
-                  v-model="item.list_id "
+                  v-model="item.list_id"
                   :items="availableLists"
                   label="Siirrä listalle"
-                  item-text=title
+                  item-text="title"
                   outlined
                 ></v-select>
               </v-col>
@@ -79,13 +84,13 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
-  name: 'ItemDialog',
+  name: "ItemDialog",
   props: {
     visible: {
-      type: Boolean,
+      type: Boolean
     },
     item: {
       type: Object
@@ -103,7 +108,7 @@ export default {
   data: () => ({
     activator: null,
     attach: null,
-    colors: ['green', 'purple', 'indigo', 'cyan', 'teal', 'orange'],
+    colors: ["green", "purple", "indigo", "cyan", "teal", "orange"],
     editing: null,
     index: -1,
     nonce: 1,
@@ -117,57 +122,60 @@ export default {
   computed: {
     show: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(value) {
         if (!value) {
-          this.$emit('close')
+          this.$emit("close");
         }
       }
     }
   },
   methods: {
-    edit (index, item) {
+    edit(index, item) {
       if (!this.editing) {
-        this.editing = item
-        this.index = index
+        this.editing = item;
+        this.index = index;
       } else {
-        this.editing = null
-        this.index = -1
+        this.editing = null;
+        this.index = -1;
       }
     },
     saveItem() {
-      if(!this.item.id) {
+      if (!this.item.id) {
         this.show = false;
-        this.$emit('save', this.item);
+        this.$emit("save", this.item);
       } else {
         this.show = false;
-        this.$emit('update', this.item);
+        this.$emit("update", this.item);
       }
     },
-    customFilter (item, queryText) {
-      const textOne = item.title.toLowerCase()
-      const searchText = queryText.toLowerCase()
-      return textOne.indexOf(searchText) > -1
-    },
+    customFilter(item, queryText) {
+      const textOne = item.title.toLowerCase();
+      const searchText = queryText.toLowerCase();
+      return textOne.indexOf(searchText) > -1;
+    }
   },
   mounted() {
-    if(!this.item.qty) this.item.qty = 1;
+    if (!this.item.qty) this.item.qty = 1;
 
-    axios.get(process.env.VUE_APP_ITEMS_ENTRYPOINT, {
-      auth: {
-        username: process.env.VUE_APP_USERNAME,
-        password: process.env.VUE_APP_PASSWORD
-      }
-    }).then(response => {
-      if(response.data) {
-        this.favourites = response.data
-      }
-    }).catch(error => {
-      /* eslint-disable no-console */
-      console.log(error);
-      /* eslint-enable no-console */
-    });
+    axios
+      .get(process.env.VUE_APP_ITEMS_ENTRYPOINT, {
+        auth: {
+          username: process.env.VUE_APP_USERNAME,
+          password: process.env.VUE_APP_PASSWORD
+        }
+      })
+      .then(response => {
+        if (response.data) {
+          this.favourites = response.data;
+        }
+      })
+      .catch(error => {
+        /* eslint-disable no-console */
+        console.log(error);
+        /* eslint-enable no-console */
+      });
   }
-}
+};
 </script>

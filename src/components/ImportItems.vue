@@ -1,12 +1,17 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="show" fullscreen hide-overlay transition="dialog-bottom-transition">
+    <v-dialog
+      v-model="show"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+    >
       <v-card>
         <v-toolbar dark color="primary">
           <v-btn icon dark @click="show = false">
             <v-icon>mdi-close</v-icon>
           </v-btn>
-          <v-toolbar-title>{{title}}</v-toolbar-title>
+          <v-toolbar-title>{{ title }}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
             <v-btn dark text @click="saveItem">Tallenna</v-btn>
@@ -32,24 +37,24 @@
 
 <script>
 export default {
-  name: 'ImportItems',
+  name: "ImportItems",
   props: {
     visible: {
-      type: Boolean,
+      type: Boolean
     }
   },
   data: () => ({
-    title: 'Tuo lista',
-    source: ''
+    title: "Tuo lista",
+    source: ""
   }),
   computed: {
     show: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(value) {
         if (!value) {
-          this.$emit('close')
+          this.$emit("close");
         }
       }
     }
@@ -60,23 +65,23 @@ export default {
       let items;
       let regex = /\d+/;
       let qty;
-      let item = {}
-      rows.forEach((row) => {
+      let item = {};
+      rows.forEach(row => {
         items = row.split(" ");
-        if(items[0].length > 0) {
+        if (items[0].length > 0) {
           qty = items[0].match(regex);
-          if(qty) {
+          if (qty) {
             items.shift();
             item = {
               title: items.join(),
-              qty: (qty[0] > 10) ? "1" : qty[0]
+              qty: qty[0] > 10 ? "1" : qty[0]
             };
-            this.$emit('save', item);
+            this.$emit("save", item);
           }
         }
       });
       this.show = false;
     }
   }
-}
+};
 </script>
