@@ -20,7 +20,7 @@
       @showListModal="listModalVisible = true"
       @changeList="changeList"
     />
-    <v-content>
+    <v-main>
       <v-container
         fluid
         v-if="$auth.isAuthenticated"
@@ -68,7 +68,7 @@
           </v-card>
         </template>
       </v-container>
-    </v-content>
+    </v-main>
     <BottomNav
       :currentList="currentList"
       :imported="imported"
@@ -300,6 +300,7 @@ export default {
         }
       }).then(response => {
         if(response.data) {
+          this.currentItem = {};
           this.items.push({title: item.text, description: item.desc, qty: item.qty});
         }
       }).catch(error => {
@@ -334,6 +335,7 @@ export default {
           this.text = "Artikkelin muokkaus onnistui!";
           this.color = "success";
           this.snackbar = true;
+          this.currentItem = {};
           this.reload();
         }
       }).catch(error => {

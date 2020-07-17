@@ -49,6 +49,7 @@
                   v-model="item.qty"
                   label="Kappalemäärä"
                   thumb-label="always"
+                  min="1"
                 >
                 </v-slider>
               </v-col>
