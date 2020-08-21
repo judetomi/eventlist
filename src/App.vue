@@ -61,15 +61,15 @@
           </v-card>
         </template>
       </v-container>
+      <BottomNav
+        :currentList="currentList"
+        :imported="imported"
+        @truncateList="truncateList"
+        @removeList="removeList"
+        @saveImported="saveImported"
+        @showImportModal="importModalVisible = true"
+      />
     </v-main>
-    <BottomNav
-      :currentList="currentList"
-      :imported="imported"
-      @truncateList="truncateList"
-      @removeList="removeList"
-      @saveImported="saveImported"
-      @showImportModal="importModalVisible = true"
-    />
     <ItemDialog
       :visible="itemModalVisible"
       :item="currentItem"

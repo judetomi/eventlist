@@ -6,6 +6,7 @@
     fixed
     grow
     v-if="$auth.isAuthenticated"
+    app
   >
     <v-btn v-if="currentList !== 2" @click="truncateList">
       <span>Tyhjennä</span>
