@@ -38,7 +38,7 @@
                   outlined
                 ></v-textarea>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="12" class="mb-5">
                 <v-subheader>Kategoriat: 1 = vihannekset, 2 = leivät, 3 = juustot, 4 = Leikkeleet, 5 = Lihat ja kalat, 6 = Einekset,
                   7 = Maitotuotteet, 8 = Kuivatavarat, 9 = Säilykkeet, 10 = Juomat, 11 = Pakasteet, 12 = Herkut, 13 = Mausteet, 14 = yleinen</v-subheader>
               </v-col>
