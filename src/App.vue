@@ -590,6 +590,7 @@ export default {
             this.text = "Nippu päivitetty onnistuneesti!";
             this.color = "success";
             this.snackbar = true;
+            this.loadBundles();
           }
         })
         .catch(error => {
