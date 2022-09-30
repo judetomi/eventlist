@@ -85,11 +85,6 @@ export default {
       type: Object
     },
   },
-  data: function() {
-    return {
-      mutableBundle: this.bundle
-    }
-  },
   computed: {
     show: {
       get() {
@@ -99,6 +94,14 @@ export default {
         if (!value) {
           this.$emit("close");
         }
+      }
+    },
+    mutableBundle: {
+      get() {
+        return this.bundle
+      },
+      set(value) {
+        return value
       }
     }
   },

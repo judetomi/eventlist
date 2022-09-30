@@ -99,7 +99,7 @@
       :visible="bundleModalVisible"
       :bundle="currentBundle"
       :title="title"
-      @close="bundleModalVisible = false"
+      @close="closeBundleModal"
       @save="addNewBundle"
       @update="updateBundleItem"
       @removeBundle="removeBundle"
@@ -641,6 +641,11 @@ export default {
     closeItemModal() {
       this.itemModalVisible = false;
       this.currentItem = {};
+      this.title = "Lisää uusi";
+    },
+    closeBundleModal() {
+      this.bundleModalVisible = false;
+      this.currentBundle = {};
       this.title = "Lisää uusi";
     },
     login() {
