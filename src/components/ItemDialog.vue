@@ -29,6 +29,16 @@
                   outlined
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" v-if="currentList !== 2">
+                <v-select
+                  v-model="mutableItem.category"
+                  :items="categories"
+                  label="Artikkelin luokka"
+                  item-value="id"
+                  item-text="title"
+                  outlined
+                ></v-select>
+              </v-col>
               <v-col cols="12">
                 <v-autocomplete
                   v-if="!mutableItem.id"
@@ -73,16 +83,6 @@
                   color="black"
                 >
                 </v-slider>
-              </v-col>
-              <v-col cols="12" v-if="currentList !== 2">
-                <v-select
-                  v-model="mutableItem.category"
-                  :items="categories"
-                  label="Artikkelin luokka"
-                  item-value="id"
-                  item-text="title"
-                  outlined
-                ></v-select>
               </v-col>
               <v-col cols="12" v-if="currentList !== 2">
                 <v-checkbox

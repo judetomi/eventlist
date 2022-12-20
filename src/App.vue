@@ -1,6 +1,6 @@
 <template>
   <v-app id="eventlist">
-    <v-snackbar v-model="snackbar" :top="y === 'top'" :color="color">
+    <v-snackbar v-model="snackbar" :top="y === 'top'" :color="color" :timeout="1000">
       {{ text }}
     </v-snackbar>
     <NavBar
@@ -27,7 +27,7 @@
               <v-list-item-group v-model="model">
                 <draggable
                   v-bind="dragOptions"
-                  @start="isDragging = true"
+                  @start="isDragging = false"
                   @end="isDragging = false"
                 >
                   <transition-group>
@@ -145,7 +145,7 @@ export default {
     currentItem: {},
     currentBundle: {},
     isDragging: false,
-    editable: true,
+    editable: false,
     title: "Lisää uusi",
     currentList: 1,
     snackbar: false,
@@ -161,31 +161,33 @@ export default {
           color: "red"
         })
         .then(confirm => {
-          this.items.splice(this.items.indexOf(item), 1);
-          axios
-            .delete(process.env.VUE_APP_ITEM_ENTRYPOINT + item.id, {
-              auth: {
-                username: process.env.VUE_APP_USERNAME,
-                password: process.env.VUE_APP_PASSWORD
-              }
-            })
-            .then(response => {
-              if (response.data) {
-                if (confirm) {
-                  this.text = "Artikkeli poistettu onnistuneesti";
-                  this.color = "success";
-                  this.snackbar = true;
+          if(confirm) {
+            this.items.splice(this.items.indexOf(item), 1);
+            axios
+              .delete(process.env.VUE_APP_ITEM_ENTRYPOINT + item.id, {
+                auth: {
+                  username: process.env.VUE_APP_USERNAME,
+                  password: process.env.VUE_APP_PASSWORD
                 }
-              }
-            })
-            .catch(error => {
-              this.text = "Ups! Artikkelia ei voitu poistaa!";
-              this.color = "error";
-              this.snackbar = true;
-              /* eslint-disable no-console */
-              console.log(error);
-              /* eslint-enable no-console */
-            });
+              })
+              .then(response => {
+                if (response.data) {
+                  if (confirm) {
+                    this.text = "Artikkeli poistettu onnistuneesti";
+                    this.color = "success";
+                    this.snackbar = true;
+                  }
+                }
+              })
+              .catch(error => {
+                this.text = "Ups! Artikkelia ei voitu poistaa!";
+                this.color = "error";
+                this.snackbar = true;
+                /* eslint-disable no-console */
+                console.log(error);
+                /* eslint-enable no-console */
+              });
+          }
         });
     },
     onTap(item) {
