@@ -197,6 +197,10 @@ export default {
           text: item.title,
           desc: item.description,
           qty: item.qty,
+          category: {
+            id: parseInt(item.category), 
+            title: ''
+          },
           favourite: item.favourite == 1 ? true : false
         };
         this.title = "Muokkaa";
@@ -688,5 +692,9 @@ export default {
 body {
   overflow: hidden;
   height: 100vh;
+}
+.v-list{
+  max-height: 480px; 
+  overflow-y: auto;
 }
 </style>
